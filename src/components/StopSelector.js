@@ -17,8 +17,7 @@ class StopSelector extends React.Component {
   constructor(props) {
     super(props);     
     
-    this.state = {selectedStop: null};
-    this.renderForm = this.renderForm.bind(this);
+    this.state = {filter: "", selectedStop: null};
     this.renderStopList = this.renderStopList.bind(this);
     this.renderLineSelection = this.renderLineSelection.bind(this);
     this.renderFilterInput = this.renderFilterInput.bind(this);
@@ -50,26 +49,41 @@ class StopSelector extends React.Component {
         {stopList}
       </ListGroup>
     } else {
-      return <h3>Write atleast two letters of bus stop</h3>
+      let array = localStorage.getItem("tuukka-raspberry-stops");
+      array = array ? JSON.parse(array): [];
+      const selected = array.map((item, index)=> {
+        return <div key={index}>
+          <h4>
+            <i className="fa fa-bus"/>
+            <span className="selector-line-number">{" " + item.line + " "}</span>
+            <i className="fa fa-map-signs" />
+            {item.stopName + " : " + item.stop}
+          </h4>
+        </div>
+      });
+
+      return <div>
+        <h3><b>Selected stops</b></h3>
+        {selected}
+      </div>
     }
   }
 
 
   renderLineSelection() {
     const handleLineClicked = (line) => {
-        let array = localStorage.getItem("tuukka-raspberry-stops");
-        array = array ? JSON.parse(array): [];
+      let array = localStorage.getItem("tuukka-raspberry-stops");
+      array = array ? JSON.parse(array): [];
 
-        let stopId = this.state.selectedStop.num;
-        let stopName = this.state.selectedStop.name;
-        let lineNumber = line;
+      let stopId = this.state.selectedStop.num;
+      let stopName = this.state.selectedStop.name;
+      let lineNumber = line;
 
-        if(stopId && stopName && lineNumber) {
-            console.log("Got here");
-            this.setState({...this.state, selectedStop: null});
-            array.push({stop: stopId, stopName: stopName, line: lineNumber});
-            localStorage.setItem("tuukka-raspberry-stops", JSON.stringify(array));
-        }
+      if(stopId && stopName && lineNumber) {
+          this.setState({...this.state, selectedStop: null, filter:""});
+          array.push({stop: stopId, stopName: stopName, line: lineNumber});
+          localStorage.setItem("tuukka-raspberry-stops", JSON.stringify(array));
+      }
     };
 
     const lineButtons = lines.map((line, index)=> {
@@ -81,8 +95,8 @@ class StopSelector extends React.Component {
 
     const stopName = this.state.selectedStop ? this.state.selectedStop.name : "";
 
-    return <Modal show={this.state.selectedStop ? true : false} size="xl" className="selector-modal"
-      onHide={() => this.setState({...this.state, selectedStop: null})}>
+    return <Modal show={!!this.state.selectedStop} size="xl" className="selector-modal"
+                  onHide={() => this.setState({...this.state, selectedStop: null})}>
       <Modal.Header closeButton>
         <Modal.Title>{stopName} - Select line</Modal.Title>
       </Modal.Header>
@@ -96,46 +110,11 @@ class StopSelector extends React.Component {
     </Modal>
   }
 
-  renderForm() {
-    const handleInput = (key, value) => {
-      let data = {...this.state.data};
-      data[key] = value;
-      this.setState({...this.state, data});
-    };
-
-    const handleSubmit = event => {
-      event.preventDefault();
-
-      let array = localStorage.getItem("tuukka-raspberry-stops");
-      array = array ? JSON.parse(array): [];
-
-      let stop = this.state.data.stop;
-      let line = this.state.data.line;
-
-      if(stop && line) {
-        array.push({stop: this.state.data.stop, line: this.state.data.line});
-        localStorage.setItem("tuukka-raspberry-stops", JSON.stringify(array));
-      }
-    };
-
-    return <Form onSubmit={handleSubmit}>
-      <Form.Row>
-        <Form.Label>Stop</Form.Label>
-        <Form.Control
-          onChange={e => handleInput("stop", e.currentTarget.value)}/>
-      </Form.Row>
-      <Form.Row>
-        <Form.Label>Line</Form.Label>
-        <Form.Control
-          onChange={e => handleInput("line", e.currentTarget.value)}/>
-      </Form.Row>
-    </Form>
-  }
-
   renderFilterInput() {
     return <div>
       <h1>Select stop</h1>
-      <Form.Control type="text" placeholder="Enter bus stop name"
+      <Form.Control type="text" placeholder="Enter at least two first letters of the bus stop"
+              value={this.state.filter}
               onChange={e => this.setState({...this.state, filter: e.currentTarget.value})}/>
     </div>
   }

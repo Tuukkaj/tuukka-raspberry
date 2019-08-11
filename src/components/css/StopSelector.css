@@ -12,3 +12,9 @@
 .selector-separator {
     margin-top: 1em;
 }
+
+.selector-line-number {
+    width: 2em;
+    display: inline-block;
+    text-align: center;
+}
