@@ -12,12 +12,19 @@ import Container from "react-bootstrap/Container";
 import Modal from "react-bootstrap/Modal";
 
 import "./css/StopSelector.css";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 class StopSelector extends React.Component {
   constructor(props) {
     super(props);     
 
-    this.state = {filter: "", selectedStop: null, removableStops: [], showRemoveModal: false};
+    this.state = {
+      filter: "",
+      selectedStop: null,
+      removableStops: [],
+      showRemoveModal: false,
+      searchType: "name"
+    };
     this.renderStopList = this.renderStopList.bind(this);
     this.renderLineSelection = this.renderLineSelection.bind(this);
     this.renderFilterInput = this.renderFilterInput.bind(this);
@@ -26,18 +33,28 @@ class StopSelector extends React.Component {
 
   renderStopList() {
     const filter = this.state.filter;
-
-    if(filter && filter.length > 1) {
+    if(filter && (filter > 0 || filter.length > 0)) {
       const handleSelection = (stop) => {
         this.setState({...this.state, selectedStop: {num: stop.StationId, name: stop.Name}})
       };
 
-      const filteredStops = stops.filter(stop => stop.Name.toLowerCase().includes(filter.toLowerCase()));
+      let filteredStops;
 
-      filteredStops.sort((stopA, stopB) => {
-        if(stopA.Name === stopB.Name) return 0;
-        return stopA.Name > stopB.Name ? 1 : 0;
-      });
+      if(this.state.searchType === "name") {
+        filteredStops = stops.filter(stop => stop.Name.toLowerCase().includes(filter.toLowerCase()));
+
+        filteredStops.sort((stopA, stopB) => {
+          if(stopA.Name === stopB.Name) return 0;
+          return stopA.Name > stopB.Name ? 1 : 0;
+        });
+      } else {
+
+        filteredStops = stops.filter(stop => stop.StationId.toString().includes(filter));
+
+        filteredStops.sort((stopA, stopB) => {
+          return stopA.StationId - stopB.StationId;
+        });
+      }
 
       const stopList = filteredStops.map((stop, index) => {
         return <ListGroup.Item action key={index}
@@ -88,7 +105,7 @@ class StopSelector extends React.Component {
         <i className="fa fa-bus"/>
         <span className="selector-line-number">{" " + stop.line + " "}</span>
         <i className="fa fa-map-signs" />
-        {stop.stopName + " : " + stop.stop}
+        {" " + stop.stopName + ": " + stop.stop}
       </>
   }
 
@@ -133,12 +150,42 @@ class StopSelector extends React.Component {
   }
 
   renderFilterInput() {
-    return <div>
-      <h1><b>Select stop</b></h1>
-      <Form.Control type="text" placeholder="Enter at least two letters of the bus stop"
-              value={this.state.filter}
-              onChange={e => this.setState({...this.state, filter: e.currentTarget.value})}/>
-    </div>
+    const handleSearchTypeSelection = type => {
+      this.setState({...this.state, searchType: type})
+    };
+
+    let formText = this.state.searchType === "name" ?
+        "Enter name of the bus stop" :
+        "Enter number of the bus stop";
+
+    return <>
+      <Row className="align-items-center">
+        <Col className="col-auto">
+          <h1><b>Select stop</b></h1>
+        </Col>
+        <Col xs={12} sm="auto">
+          <ButtonGroup>
+            <Button variant={this.state.searchType === "name" ? "danger" : "secondary"}
+              onClick={() => handleSearchTypeSelection("name")}
+              size="sm">
+              <b>Stop name</b>
+            </Button>
+            <Button variant={this.state.searchType === "number" ? "danger" : "secondary"}
+              onClick={() => handleSearchTypeSelection("number")}
+              size="sm">
+              <b>Stop number</b>
+            </Button>
+          </ButtonGroup>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Form.Control type="text" placeholder={formText}
+                        value={this.state.filter}
+                        onChange={e => this.setState({...this.state, filter: e.currentTarget.value})}/>
+        </Col>
+      </Row>
+    </>
   }
 
   renderStopRemovalModal() {
