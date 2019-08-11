@@ -13,8 +13,24 @@
     margin-top: 1em;
 }
 
+.selector-separator-small {
+    margin-top: 0.5em;
+}
+
+.selector-separator-left {
+    margin-left: 1em;
+}
+
+.selector-separator-left-small {
+    margin-left: 1em;
+}
+
 .selector-line-number {
     width: 2em;
     display: inline-block;
     text-align: center;
+}
+
+.selector-inline-block {
+    display: inline-block;
 }

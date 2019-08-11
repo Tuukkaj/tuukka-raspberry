@@ -16,11 +16,12 @@ import "./css/StopSelector.css";
 class StopSelector extends React.Component {
   constructor(props) {
     super(props);     
-    
-    this.state = {filter: "", selectedStop: null};
+
+    this.state = {filter: "", selectedStop: null, removableStops: [], showRemoveModal: false};
     this.renderStopList = this.renderStopList.bind(this);
     this.renderLineSelection = this.renderLineSelection.bind(this);
     this.renderFilterInput = this.renderFilterInput.bind(this);
+    this.renderStopRemovalModal = this.renderStopRemovalModal.bind(this);
   }
 
   renderStopList() {
@@ -54,21 +55,42 @@ class StopSelector extends React.Component {
       const selected = array.map((item, index)=> {
         return <div key={index}>
           <h4>
-            <i className="fa fa-bus"/>
-            <span className="selector-line-number">{" " + item.line + " "}</span>
-            <i className="fa fa-map-signs" />
-            {item.stopName + " : " + item.stop}
+            {StopSelector.transformToStopAndLineText(item)}
           </h4>
         </div>
       });
 
-      return <div>
-        <h3><b>Selected stops</b></h3>
-        {selected}
-      </div>
+      return <>
+        <Row className="align-items-center">
+          <Col className="col-auto">
+            <h3 className="selector-inline-block"><b>Stops</b></h3>
+          </Col>
+          <Col>
+            <Button variant="danger"
+                    size="sm"
+                    disabled={array.length <= 0}
+                    onClick={() => this.setState({...this.state, showRemoveModal: true})}>
+              <i className="fa fa-times"/> <b>Remove stops</b>
+            </Button>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            {selected}
+          </Col>
+        </Row>
+      </>
     }
   }
 
+  static transformToStopAndLineText(stop) {
+    return <>
+        <i className="fa fa-bus"/>
+        <span className="selector-line-number">{" " + stop.line + " "}</span>
+        <i className="fa fa-map-signs" />
+        {stop.stopName + " : " + stop.stop}
+      </>
+  }
 
   renderLineSelection() {
     const handleLineClicked = (line) => {
@@ -112,11 +134,83 @@ class StopSelector extends React.Component {
 
   renderFilterInput() {
     return <div>
-      <h1>Select stop</h1>
-      <Form.Control type="text" placeholder="Enter at least two first letters of the bus stop"
+      <h1><b>Select stop</b></h1>
+      <Form.Control type="text" placeholder="Enter at least two letters of the bus stop"
               value={this.state.filter}
               onChange={e => this.setState({...this.state, filter: e.currentTarget.value})}/>
     </div>
+  }
+
+  renderStopRemovalModal() {
+    let array = localStorage.getItem("tuukka-raspberry-stops");
+    array = array ? JSON.parse(array) : [];
+
+    const handleClick = index => {
+      if(!this.state.removableStops.includes(index)) {
+        let temp = [...this.state.removableStops];
+        temp.push(index);
+        this.setState({...this.state, removableStops: temp});
+      } else {
+        this.setState({...this.state, removableStops: this.state.removableStops.filter(num => num !== index)});
+      }
+    };
+
+    const stops = array.map((stop, index)=> {
+      return <Row key={index} className="align-items-center selector-separator-small no-gutters">
+        <Col className="col-auto">
+          <Button onClick={() => handleClick(index)}
+            size="sm"
+            variant={this.state.removableStops.includes(index) ? "danger" : "secondary"}>
+            <i className={this.state.removableStops.includes(index) ? "fa fa-times" : "fa fa-circle"}/>
+          </Button>
+        </Col>
+        <Col className="selector-separator-left-small">
+          <h5 className="selector-inline-block">
+            {StopSelector.transformToStopAndLineText(stop)}
+          </h5>
+        </Col>
+      </Row>
+    });
+
+    const cancel = () => {
+      this.setState({...this.state, showRemoveModal: false, removableStops: []})
+    };
+
+    const removeSelected = () => {
+      let array = localStorage.getItem("tuukka-raspberry-stops");
+      array = array ? JSON.parse(array) : [];
+      let toRemove = [...this.state.removableStops.sort()];
+
+      for(let i = toRemove.length - 1; i >= 0; i--) {
+        array.splice(toRemove[i], 1);
+      }
+
+      localStorage.setItem("tuukka-raspberry-stops", JSON.stringify(array));
+      cancel()
+    };
+
+
+    return <Modal show={this.state.showRemoveModal} size="xl" className="selector-modal"
+                  onHide={cancel}>
+      <Modal.Header closeButton>
+        <Modal.Title>Select lines</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {stops}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="danger"
+                onClick={removeSelected}
+                size="sm">
+          <b>Remove selected</b>
+        </Button>
+        <Button variant="secondary"
+                onClick={cancel}
+                size="sm">
+          <b>Cancel</b>
+        </Button>
+      </Modal.Footer>
+    </Modal>
   }
 
   render() {
@@ -135,6 +229,11 @@ class StopSelector extends React.Component {
           <Row>
             <Col className="selector-modal">
               {this.renderLineSelection()}
+            </Col>
+          </Row>
+          <Row>
+            <Col className="selector-modal">
+              {this.renderStopRemovalModal()}
             </Col>
           </Row>
         </Container>
