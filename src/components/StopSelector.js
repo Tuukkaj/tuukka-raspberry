@@ -59,6 +59,7 @@ class StopSelector extends React.Component {
       const stopList = filteredStops.map((stop, index) => {
         return <ListGroup.Item action key={index}
                                onClick={() => handleSelection(stop)}>
+          <i className="fa fa-map-signs"/>{" "}
           {stop.Name}: {stop.StationId}
         </ListGroup.Item>
       });
@@ -126,7 +127,7 @@ class StopSelector extends React.Component {
     };
 
     const lineButtons = lines.map((line, index)=> {
-      return <Button variant="success" className="selector-line-button" key={index}
+      return <Button variant="danger" className="selector-line-button" key={index}
         onClick={() => handleLineClicked(line)}>
         {line}
       </Button>
@@ -137,7 +138,10 @@ class StopSelector extends React.Component {
     return <Modal show={!!this.state.selectedStop} size="xl" className="selector-modal"
                   onHide={() => this.setState({...this.state, selectedStop: null})}>
       <Modal.Header closeButton>
-        <Modal.Title>{stopName} - Select line</Modal.Title>
+        <Modal.Title>
+          {stopName} - Select line {" "}
+          <i className="fa fa-bus"/>
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Row>
