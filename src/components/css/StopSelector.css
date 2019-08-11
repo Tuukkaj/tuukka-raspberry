@@ -1,0 +1,14 @@
+.selector-line-button {
+    margin: 0.2em;
+    width: 3em;
+}
+
+.selector-modal .modal-dialog {
+    max-width: 100% !important;
+    margin: 1em;
+    padding: 0;
+}
+
+.selector-separator {
+    margin-top: 1em;
+}
