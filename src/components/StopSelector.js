@@ -33,7 +33,7 @@ class StopSelector extends React.Component {
 
   renderStopList() {
     const filter = this.state.filter;
-    if(filter && (filter > 0 || filter.length > 0)) {
+    if(filter && (filter > 0 || filter.length > 1)) {
       const handleSelection = (stop) => {
         this.setState({...this.state, selectedStop: {num: stop.StationId, name: stop.Name}})
       };
@@ -159,7 +159,7 @@ class StopSelector extends React.Component {
     };
 
     let formText = this.state.searchType === "name" ?
-        "Enter name of the bus stop" :
+        "Enter name of the bus stop (At least two characters)" :
         "Enter number of the bus stop";
 
     return <>
