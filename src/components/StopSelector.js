@@ -13,6 +13,7 @@ import Modal from "react-bootstrap/Modal";
 
 import "./css/StopSelector.css";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Spinner from "react-bootstrap/Spinner";
 
 class StopSelector extends React.Component {
   constructor(props) {
@@ -23,7 +24,8 @@ class StopSelector extends React.Component {
       selectedStop: null,
       removableStops: [],
       showRemoveModal: false,
-      searchType: "name"
+      searchType: "name",
+      possibleStops: null
     };
     this.renderStopList = this.renderStopList.bind(this);
     this.renderLineSelection = this.renderLineSelection.bind(this);
@@ -35,7 +37,18 @@ class StopSelector extends React.Component {
     const filter = this.state.filter;
     if(filter && (filter > 0 || filter.length > 1)) {
       const handleSelection = (stop) => {
-        this.setState({...this.state, selectedStop: {num: stop.StationId, name: stop.Name}})
+        this.setState({...this.state, selectedStop: {num: stop.StationId, name: stop.Name}}, () => {
+          let stop = `http://localhost:8080/lines/${this.state.selectedStop.num}`;
+
+          fetch(stop)
+            .then(res => res.json())
+            .then(data => {
+              this.setState({...this.state, possibleStops: data})
+            })
+            .catch(err => {
+              this.setState({...this.state, possibleStops: 0})
+            });
+        })
       };
 
       let filteredStops;
@@ -120,23 +133,37 @@ class StopSelector extends React.Component {
       let lineNumber = line;
 
       if(stopId && stopName && lineNumber) {
-          this.setState({...this.state, selectedStop: null, filter:""});
+          this.setState({...this.state, selectedStop: null, filter:"", possibleStops: null});
           array.push({stop: stopId, stopName: stopName, line: lineNumber});
           localStorage.setItem("tuukka-raspberry-stops", JSON.stringify(array));
       }
     };
 
-    const lineButtons = lines.map((line, index)=> {
-      return <Button variant="danger" className="selector-line-button" key={index}
-        onClick={() => handleLineClicked(line)}>
-        {line}
-      </Button>
-    });
+    const getStopLines = () => {
+      if(this.state.possibleStops !== null && this.state.possibleStops === 0) {
+        return lines.map((line, index)=> {
+          return <Button variant="danger" className="selector-line-button" key={index}
+                         onClick={() => handleLineClicked(line)}>
+            {line}
+          </Button>
+        });
+      } else if(this.state.possibleStops !== null && typeof this.state.possibleStops === "object") {
+        return this.state.possibleStops.lines.map((line, index)=> {
+          return <Button variant="danger" className="selector-line-button" key={index}
+                  onClick={() => handleLineClicked(line)}>
+            {line}
+          </Button>
+        });
+      } else {
+        return <Spinner animation="border" variant="danger" className="selector-line-spinner"/>
+      }
+    };
+
 
     const stopName = this.state.selectedStop ? this.state.selectedStop.name : "";
 
     return <Modal show={!!this.state.selectedStop} size="xl" className="selector-modal"
-                  onHide={() => this.setState({...this.state, selectedStop: null})}>
+                  onHide={() => this.setState({...this.state, selectedStop: null, possibleStops: null})}>
       <Modal.Header closeButton>
         <Modal.Title>
           {stopName} - Select line {" "}
@@ -146,7 +173,7 @@ class StopSelector extends React.Component {
       <Modal.Body>
         <Row>
           <Col>
-            {lineButtons}
+            {getStopLines()}
           </Col>
         </Row>
       </Modal.Body>

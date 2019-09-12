@@ -1,6 +1,6 @@
 .selector-line-button {
     margin: 0.2em;
-    width: 3em;
+    width: 5em;
 }
 
 .selector-modal .modal-dialog {
@@ -26,11 +26,16 @@
 }
 
 .selector-line-number {
-    width: 2em;
+    width: 5em;
     display: inline-block;
     text-align: center;
 }
 
 .selector-inline-block {
     display: inline-block;
+}
+
+.selector-line-spinner {
+    display: block;
+    margin: auto;
 }
