@@ -1,0 +1,14 @@
+.switcher-row {
+    pointer-events: none;
+}
+
+.switcher-col {
+    margin-bottom: 2em;
+    margin-right: 1em;
+}
+
+.switcher-icon {
+    color: red;
+    cursor: pointer;
+    pointer-events: all !important;
+}
