@@ -90,19 +90,10 @@ class StopSelector extends React.Component {
           </h4>
         </div>
       });
-
       return <>
         <Row className="align-items-center">
           <Col className="col-auto">
             <h3 className="selector-inline-block"><b>Stops</b></h3>
-          </Col>
-          <Col>
-            <Button variant="danger"
-                    size="sm"
-                    disabled={array.length <= 0}
-                    onClick={() => this.setState({...this.state, showRemoveModal: true})}>
-              <i className="fa fa-times"/> <b>Remove stops</b>
-            </Button>
           </Col>
         </Row>
         <Row>
@@ -189,12 +180,15 @@ class StopSelector extends React.Component {
         "Enter name of the bus stop (At least two characters)" :
         "Enter number of the bus stop";
 
+    let array = localStorage.getItem("tuukka-raspberry-stops");
+    array = array ? JSON.parse(array): [];
+
     return <>
       <Row className="align-items-center">
         <Col className="col-auto">
           <h1><b>Select stop</b></h1>
         </Col>
-        <Col xs={12} sm="auto">
+        <Col sm={12} md="auto" className="selector-title-button">
           <ButtonGroup>
             <Button variant={this.state.searchType === "name" ? "danger" : "secondary"}
               onClick={() => handleSearchTypeSelection("name")}
@@ -207,6 +201,14 @@ class StopSelector extends React.Component {
               <b>Stop number</b>
             </Button>
           </ButtonGroup>
+        </Col>
+        <Col sm={12} md="auto" className="selector-title-button">
+          <Button variant="danger"
+                  size="sm"
+                  disabled={array.length <= 0}
+                  onClick={() => this.setState({...this.state, showRemoveModal: true})}>
+            <i className="fa fa-times"/> <b>Remove stops</b>
+          </Button>
         </Col>
       </Row>
       <Row>

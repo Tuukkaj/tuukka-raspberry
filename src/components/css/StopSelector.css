@@ -39,3 +39,9 @@
     display: block;
     margin: auto;
 }
+
+@media only screen and (max-width: 767px) {
+    .selector-title-button {
+        margin-bottom: 1em;
+    }
+}
