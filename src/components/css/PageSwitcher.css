@@ -8,7 +8,7 @@
 }
 
 .switcher-icon {
-    color: red;
+    color: #dc3545;
     cursor: pointer;
     pointer-events: all !important;
 }

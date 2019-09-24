@@ -16,8 +16,8 @@ function PageSwitcher(props) {
     }
   }
 
-  return <Row className="fixed-bottom justify-content-end switcher-row" align="center">
-      <Col className="col-1 no-gutters switcher-col">
+  return <Row className="fixed-bottom flex-row-reverse switcher-row" >
+      <Col xs="auto" className="switcher-col">
         {getIcon()}
       </Col>
     </Row>
