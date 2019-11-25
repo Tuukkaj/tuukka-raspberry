@@ -10,7 +10,7 @@ function App() {
 
       <Switch>
         <Route path="/manage" component={StopSelector}/>
-        <Route path="/" component={() => <h1>moi</h1>}/>
+        <Route path="/" component={() => <h1>Times</h1>}/>
       </Switch>
     </HashRouter>
   );
